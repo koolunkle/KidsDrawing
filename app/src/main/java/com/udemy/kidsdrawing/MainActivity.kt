@@ -76,6 +76,11 @@ class MainActivity : AppCompatActivity() {
             showBrushSizeChooserDialog()
         }
 
+        val undo: ImageButton = findViewById(R.id.ib_undo)
+        undo.setOnClickListener {
+            drawingView?.onClickUndo()
+        }
+
         val gallery: ImageButton = findViewById(R.id.ib_gallery)
         gallery.setOnClickListener {
             requestStoragePermission()
