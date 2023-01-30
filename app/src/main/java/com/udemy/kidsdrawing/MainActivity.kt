@@ -31,6 +31,8 @@ class MainActivity : AppCompatActivity() {
 
     private var mImageButtonCurrentPaint: ImageButton? = null
 
+    private var customProgressDialog: Dialog? = null
+
     private val openGalleryLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK && result.data != null) {
@@ -92,6 +94,7 @@ class MainActivity : AppCompatActivity() {
         val save: ImageButton = findViewById(R.id.ib_save)
         save.setOnClickListener {
             if (isReadStorageAllowed()) {
+                showProgressDialog()
                 lifecycleScope.launch {
                     val flDrawingView: FrameLayout = findViewById(R.id.fl_drawing_view_container)
                     saveBitmapFile(getBitmapFromView(flDrawingView))
@@ -210,6 +213,8 @@ class MainActivity : AppCompatActivity() {
                     result = f.absolutePath
 
                     runOnUiThread {
+                        cancelProgressDialog()
+
                         if (result.isNotEmpty()) {
                             Toast.makeText(
                                 applicationContext,
@@ -231,6 +236,19 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return result
+    }
+
+    private fun showProgressDialog() {
+        customProgressDialog = Dialog(this)
+        customProgressDialog?.setContentView(R.layout.dialog_custom_progress)
+        customProgressDialog?.show()
+    }
+
+    private fun cancelProgressDialog() {
+        if (customProgressDialog != null) {
+            customProgressDialog?.dismiss()
+            customProgressDialog = null
+        }
     }
 
 }
