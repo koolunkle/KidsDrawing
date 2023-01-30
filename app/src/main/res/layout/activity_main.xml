@@ -24,7 +24,7 @@
             android:layout_height="match_parent"
             android:contentDescription="@null"
             android:scaleType="centerCrop"
-            android:src="@drawable/image" />
+            tools:src="@drawable/image" />
 
         <com.udemy.kidsdrawing.DrawingView
             android:id="@+id/drawing_view"

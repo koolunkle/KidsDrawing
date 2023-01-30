@@ -6,8 +6,11 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.media.MediaScannerConnection
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
@@ -16,6 +19,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.view.get
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
@@ -205,7 +209,7 @@ class MainActivity : AppCompatActivity() {
                     mBitmap.compress(Bitmap.CompressFormat.PNG, 90, bytes)
 
                     val f =
-                        File(externalCacheDir?.absoluteFile.toString() + File.separator + "Kids Drawing" + System.currentTimeMillis() / 1000 + ".png")
+                        File(externalCacheDir?.absoluteFile.toString() + File.separator + "KidsDrawing_" + System.currentTimeMillis() / 1000 + ".png")
                     val fo = FileOutputStream(f)
 
                     fo.write(bytes.toByteArray())
@@ -221,6 +225,8 @@ class MainActivity : AppCompatActivity() {
                                 "File saved successfully :$result",
                                 Toast.LENGTH_SHORT
                             ).show()
+
+                            shareImage(result)
                         } else {
                             Toast.makeText(
                                 applicationContext,
@@ -249,6 +255,27 @@ class MainActivity : AppCompatActivity() {
             customProgressDialog?.dismiss()
             customProgressDialog = null
         }
+    }
+
+    private fun shareImage(result: String) {
+        MediaScannerConnection.scanFile(this, arrayOf(result), null) { path, _ ->
+            val requestFile = File(path)
+            val fileUri: Uri? = try {
+                FileProvider.getUriForFile(this, AUTHORITY, requestFile)
+            } catch (e: Exception) {
+                Log.e("File Selector", "The selected file can't be shared: $requestFile")
+                null
+            }
+            val shareIntent = Intent()
+            shareIntent.action = Intent.ACTION_SEND
+            shareIntent.type = "image/png"
+            shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri)
+            startActivity(Intent.createChooser(shareIntent, "Share"))
+        }
+    }
+
+    companion object {
+        private const val AUTHORITY = "${BuildConfig.APPLICATION_ID}.fileprovider"
     }
 
 }
